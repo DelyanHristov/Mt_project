@@ -231,6 +231,12 @@ def main():
         preds, labels = eval_pred
         if isinstance(preds, tuple):
             preds = preds[0]
+        preds = np.asarray(preds)
+        if preds.ndim == 3:
+            preds = preds.argmax(axis=-1)
+        preds = preds.astype(np.int64, copy=False)
+        pad_id = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
+        preds = np.where(preds < 0, pad_id, preds)
         decoded_preds = tok.batch_decode(preds, skip_special_tokens=True)
         labels = np.where(labels == -100, tok.pad_token_id, labels)
         decoded_labels = tok.batch_decode(labels, skip_special_tokens=True)
